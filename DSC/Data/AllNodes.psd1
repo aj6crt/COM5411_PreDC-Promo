@@ -43,7 +43,14 @@ This is not just a rule - this is professional survival.
         @{
             NodeName   = 'localhost'
             Role       = 'DC'
-            DomainName = 'bolton.barmbuzz.test'
+            DomainName = 'barmbuzz.local'
+
+            ComputerName   = 'BB-DC01'
+            TimeZone       = 'GMT Standard Time'
+            EnsureW32Time  = $true
+
+            InstallADDSRole  = $true
+            InstallRSATADDS  = $true
             
             # SECURITY NOTE: Future credential properties will be added by the orchestrator
             # at runtime, not stored here. Example (YOU DON'T ADD THIS YET):
