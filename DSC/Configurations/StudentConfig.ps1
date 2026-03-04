@@ -42,15 +42,18 @@ This is not paranoia - this is professional discipline.
 #>
 
 Configuration StudentBaseline {
-    param()
+    param(
+        [PSCredential]$DomainAdminCredential,
+        [PSCredential]$DsrmCredential,
+        [PSCredential]$UserCredential
+        
+    )
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ComputerManagementDSC
-    #Import-DscResource -ModuleName ActivedirectoryDSC
-
+    # Import-DscResource -ModuleName ActivedirectoryDSC
 
     Node $AllNodes.NodeName {
-
         # Ensure C:\TEST exists
         File TestFolder {
             DestinationPath = 'C:\TEST'
@@ -66,6 +69,5 @@ Configuration StudentBaseline {
             Contents        = 'Proof-of-life: DSC created this file.'
             DependsOn       = '[File]TestFolder'
         }
-
     }
 }
