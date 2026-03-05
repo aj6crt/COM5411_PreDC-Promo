@@ -50,36 +50,74 @@ Configuration StudentBaseline {
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ComputerManagementDSC
+    Import-DscResource -ModuleName ActiveDirectoryDsc
+    Import-DscResource -ModuleName NetworkingDsc
 
     Node $AllNodes.NodeName {
-        # Your existing code for Computer, TimeZone, Service, and WindowsFeature goes here
 
-        # Use the Computer resource from ComputerManagementDsc to set the computer name
-        Computer SetName {
-            Name = $AllNodes.ComputerName
+        # Set the computer name
+        Computer SetComputerName {
+            Name = $Node.ComputerName
         }
+
         # Set The Timezone
         TimeZone SetTimeZone {
             IsSingleInstance = 'Yes'
-            TimeZone = $AllNodes.TimeZone
+            TimeZone = $Node.TimeZone
+        }
+
+        ### Network Settings - Internal NIC
+        IPAddress SetInternalIP {
+            InterfaceAlias = $Node.InterfaceAlias_Internal
+            AddressFamily  = 'IPv4'
+            IPAddress      = $Node.IPv4Address_Internal
+            # FIXED: Now matches the 'SetComputerName' resource name above
+            DependsOn      = '[Computer]SetComputerName'
+        }
+
+        DnsServerAddress SetInternalDns {
+            InterfaceAlias = $Node.InterfaceAlias_Internal
+            AddressFamily  = 'IPv4'
+            Address        = $Node.DNSServers_Internal
+            DependsOn      = '[IPAddress]SetInternalIP'
+        }
+
+        ### Network Settings -- External NIC
+        DnsConnectionSuffix DisableNatDnsRegistration {
+            InterfaceAlias            = $Node.InterfaceAlias_NAT
+            ConnectionSpecificSuffix = ''
+            RegisterThisConnectionsAddress = $false
+            DependsOn                 = '[DnsServerAddress]SetInternalDns'
         }
 
         Service WindowsTime {
-            Name = 'W32Time'
-            State = 'Running'
+            Name        = 'W32Time'
+            State       = 'Running'
             StartupType = 'Automatic'
-            DependsOn = '[TimeZone]SetTimeZone'
+            DependsOn   = '[TimeZone]SetTimeZone'
         }
 
         WindowsFeature ADDS {
-            Name = 'AD-Domain-Services'
+            Name   = 'AD-Domain-Services'
             Ensure = 'Present'
         }
 
         WindowsFeature RSAT-ADDS {
-            Name = 'RSAT-AD-Tools'
-            Ensure = 'Present'
+            Name      = 'RSAT-AD-Tools'
+            Ensure    = 'Present'
             DependsOn = '[WindowsFeature]ADDS'
+        }
+
+        ### PROMOTE TO DOMAIN CONTROLLER
+        ADDomain CreateForest {
+            DomainName                    = $Node.DomainName
+            DomainNetBIOSName             = $Node.DomainNetBIOSName
+            Credential                    = $DomainAdminCredential
+            SafemodeAdministratorPassword = $DsrmCredential
+            ForestMode                    = $Node.ForestMode
+            DomainMode                    = $Node.DomainMode
+            # FIXED: Now matches the 'RSAT-ADDS' resource name above
+            DependsOn                     = '[WindowsFeature]RSAT-ADDS'
         }
     }
 }

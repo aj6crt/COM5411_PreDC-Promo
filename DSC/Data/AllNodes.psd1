@@ -41,16 +41,39 @@ This is not just a rule - this is professional survival.
 @{
     AllNodes = @(
         @{
-            NodeName   = 'localhost'
-            Role       = 'DC'
-            DomainName = 'barmbuzz.local'
+            NodeName     = 'localhost'
+            Role         = 'DC'
 
-            ComputerName   = 'BB-DC01'
-            TimeZone       = 'GMT Standard Time'
-            EnsureW32Time  = $true
+            ## AD Settings
+            DomainName = 'barmbuzz.corp'
+            DomainNetBIOSName = 'BARMBUZZ'
+            ForestMode = 'WinThreshold'
+            DomainMode = 'WinThreshold'
 
-            InstallADDSRole  = $true
-            InstallRSATADDS  = $true
+            ## Computer Settings
+
+            ComputerName = 'BB-DC01'
+            TimeZone     = 'GMT Standard Time'
+            EnsureW32Time = $true
+
+            #Network Settings - Internal NIC
+            InterfaceAlias_Internal = 'Internal-Static'
+            IPv4Address_Internal = '192.168.1.10/24'
+            DefaultGateway_Internal = $null
+            DNSServers_Internal = '127.0.0.1'
+
+            #Network Settings - External NIC
+            InterfaceAlias_NAT = 'Internet-NAT'
+            DisableDnsRegistrationOnNat = $true
+
+            # Install Featureds and RSAT tools for ADDS
+
+            InstallADDS = $true
+            InstallRSAT = $true
+
+            #Security Settings.
+            PsDscAllowPlainTextPassword = $true
+            PsDscAllowDomainUser = $true
             
             # SECURITY NOTE: Future credential properties will be added by the orchestrator
             # at runtime, not stored here. Example (YOU DON'T ADD THIS YET):
