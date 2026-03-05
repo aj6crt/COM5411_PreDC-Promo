@@ -58,18 +58,20 @@ This is not just a rule - this is professional survival.
 
             #Network Settings - Internal NIC
             InterfaceAlias_Internal = 'Internal-Static'
-            IPv4Address_Internal = '192.168.1.10/24'
+            IPv4Address_Internal = '192.168.1.10'
+            PrefixLength_Internal   = 24
             DefaultGateway_Internal = $null
-            DNSServers_Internal = '127.0.0.1'
+            DNSServers_Internal     = @('127.0.0.1')
 
             #Network Settings - External NIC
             InterfaceAlias_NAT = 'Internet-NAT'
+            Expect_NAT_Dhcp             = $true
             DisableDnsRegistrationOnNat = $true
 
             # Install Featureds and RSAT tools for ADDS
 
-            InstallADDS = $true
-            InstallRSAT = $true
+            InstallADDSRole = $true
+            InstallRSATADDS = $true
 
             #Security Settings.
             PsDscAllowPlainTextPassword = $true

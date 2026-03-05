@@ -97,15 +97,19 @@ Configuration StudentBaseline {
             DependsOn   = '[TimeZone]SetTimeZone'
         }
 
-        WindowsFeature ADDS {
-            Name   = 'AD-Domain-Services'
-            Ensure = 'Present'
+       if ($Node.InstallADDSRole) {
+            WindowsFeature ADDS {
+                Name   = 'AD-Domain-Services'
+                Ensure = 'Present'
+            }
         }
 
-        WindowsFeature RSAT-ADDS {
-            Name      = 'RSAT-AD-Tools'
-            Ensure    = 'Present'
-            DependsOn = '[WindowsFeature]ADDS'
+        if ($Node.InstallRSATADDS) {
+            WindowsFeature RSAT-ADDS {
+                Name      = 'RSAT-ADDS'
+                Ensure    = 'Present'
+                DependsOn = '[WindowsFeature]ADDS'
+            }
         }
 
         ### PROMOTE TO DOMAIN CONTROLLER
