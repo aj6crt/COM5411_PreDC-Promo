@@ -72,7 +72,7 @@ Configuration StudentBaseline {
             AddressFamily  = 'IPv4'
             IPAddress      = $Node.IPv4Address_Internal
             # FIXED: Now matches the 'SetComputerName' resource name above
-            DependsOn      = '[Computer]SetComputerName'
+            DependsOn = '[Computer]SetComputerName'
         }
 
         DnsServerAddress SetInternalDns {
@@ -87,7 +87,7 @@ Configuration StudentBaseline {
             InterfaceAlias            = $Node.InterfaceAlias_NAT
             ConnectionSpecificSuffix = ''
             RegisterThisConnectionsAddress = $false
-            DependsOn                 = '[DnsServerAddress]SetInternalDns'
+            DependsOn = '[DnsServerAddress]SetInternalDns'
         }
 
         Service WindowsTime {
@@ -117,7 +117,7 @@ Configuration StudentBaseline {
             ForestMode                    = $Node.ForestMode
             DomainMode                    = $Node.DomainMode
             # FIXED: Now matches the 'RSAT-ADDS' resource name above
-            DependsOn                     = '[WindowsFeature]RSAT-ADDS'
+            DependsOn = '[WindowsFeature]RSAT-ADDS'
         }
     }
 }
