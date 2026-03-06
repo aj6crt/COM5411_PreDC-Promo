@@ -1,0 +1,6 @@
+
+FullName                                                                  Length LastWri
+                                                                                 teTime
+--------                                                                  ------ -------
+C:\Dev\Repo\COM5411_PreDC-Promo\DSC\Outputs\StudentBaseline\localhost.mof   9894 05/03/…
+

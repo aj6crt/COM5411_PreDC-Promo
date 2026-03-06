@@ -50,29 +50,26 @@ Configuration StudentBaseline {
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
     Import-DscResource -ModuleName ComputerManagementDsc
-    Import-DscResource -ModuleName ActiveDirectoryDsc
     Import-DscResource -ModuleName NetworkingDsc
+    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     Node $AllNodes.NodeName {
 
-        # Set the computer name
         Computer SetComputerName {
             Name = $Node.ComputerName
         }
+        
 
-        # Set The Timezone
         TimeZone SetTimeZone {
             IsSingleInstance = 'Yes'
-            TimeZone = $Node.TimeZone
+            TimeZone         = $Node.TimeZone
         }
 
-        ### Network Settings - Internal NIC
         IPAddress SetInternalIP {
             InterfaceAlias = $Node.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
             IPAddress      = $Node.IPv4Address_Internal
-            # FIXED: Now matches the 'SetComputerName' resource name above
-            DependsOn = '[Computer]SetComputerName'
+            DependsOn      = '[Computer]SetComputerName'
         }
 
         DnsServerAddress SetInternalDns {
@@ -82,12 +79,10 @@ Configuration StudentBaseline {
             DependsOn      = '[IPAddress]SetInternalIP'
         }
 
-        ### Network Settings -- External NIC
-        DnsConnectionSuffix DisableNatDnsRegistration {
-            InterfaceAlias            = $Node.InterfaceAlias_NAT
-            ConnectionSpecificSuffix = ''
+        Get-DnsClient DisableNatRegistration {
+            InterfaceAlias                 = $Node.InterfaceAlias_NAT
             RegisterThisConnectionsAddress = $false
-            DependsOn = '[DnsServerAddress]SetInternalDns'
+            DependsOn                      = '[DnsServerAddress]SetInternalDns'
         }
 
         Service WindowsTime {
@@ -97,7 +92,7 @@ Configuration StudentBaseline {
             DependsOn   = '[TimeZone]SetTimeZone'
         }
 
-       if ($Node.InstallADDSRole) {
+        if ($Node.InstallADDSRole) {
             WindowsFeature ADDS {
                 Name   = 'AD-Domain-Services'
                 Ensure = 'Present'
@@ -112,7 +107,6 @@ Configuration StudentBaseline {
             }
         }
 
-        ### PROMOTE TO DOMAIN CONTROLLER
         ADDomain CreateForest {
             DomainName                    = $Node.DomainName
             DomainNetBIOSName             = $Node.DomainNetBIOSName
@@ -120,9 +114,13 @@ Configuration StudentBaseline {
             SafemodeAdministratorPassword = $DsrmCredential
             ForestMode                    = $Node.ForestMode
             DomainMode                    = $Node.DomainMode
-            # FIXED: Now matches the 'RSAT-ADDS' resource name above
-            DependsOn = '[WindowsFeature]RSAT-ADDS'
+            DatabasePath                  = 'C:\Windows\NTDS'
+            LogPath                       = 'C:\Windows\NTDS'
+            SysvolPath                    = 'C:\Windows\SYSVOL'
+            # COMBINED AND FIXED NAMES BELOW
+            DependsOn                     = @('[WindowsFeature]RSAT-ADDS', '[DnsServerAddress]SetInternalDns')
         }
     }
+
 }
 

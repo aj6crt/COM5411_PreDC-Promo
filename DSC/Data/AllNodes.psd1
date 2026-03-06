@@ -41,50 +41,39 @@ This is not just a rule - this is professional survival.
 @{
     AllNodes = @(
         @{
-            NodeName     = 'localhost'
-            Role         = 'DC'
+            NodeName          = 'localhost'
+            Role              = 'DC'
 
             ## AD Settings
-            DomainName = 'barmbuzz.corp'
+            DomainName        = 'barmbuzz.local'
             DomainNetBIOSName = 'BARMBUZZ'
-            ForestMode = 'WinThreshold'
-            DomainMode = 'WinThreshold'
+            ForestMode        = 'WinThreshold' # Windows Server 2016+
+            DomainMode        = 'WinThreshold'
 
             ## Computer Settings
+            ComputerName      = 'BB-DC01'
+            TimeZone          = 'GMT Standard Time'
+            EnsureW32Time     = $true
 
-            ComputerName = 'BB-DC01'
-            TimeZone     = 'GMT Standard Time'
-            EnsureW32Time = $true
-
-            #Network Settings - Internal NIC
+            ## Network Settings - Internal NIC (Static)
             InterfaceAlias_Internal = 'Internal-Static'
-            IPv4Address_Internal = '192.168.1.10'
+            IPv4Address_Internal    = '192.168.1.10'
             PrefixLength_Internal   = 24
             DefaultGateway_Internal = $null
             DNSServers_Internal     = @('127.0.0.1')
 
-            #Network Settings - External NIC
-            InterfaceAlias_NAT = 'Internet-NAT'
-            Expect_NAT_Dhcp             = $true
+            ## Network Settings - External NIC (DHCP/NAT)
+            InterfaceAlias_NAT      = 'Internet-NAT'
+            Expect_NAT_Dhcp         = $true
             DisableDnsRegistrationOnNat = $true
 
-            # Install Featureds and RSAT tools for ADDS
+            ## Feature Flags
+            InstallADDSRole         = $true
+            InstallRSATADDS         = $true
 
-            InstallADDSRole = $true
-            InstallRSATADDS = $true
-
-            #Security Settings.
+            ## Security Settings (For Lab Orchestrator)
             PsDscAllowPlainTextPassword = $true
-            PsDscAllowDomainUser = $true
-            
-            # SECURITY NOTE: Future credential properties will be added by the orchestrator
-            # at runtime, not stored here. Example (YOU DON'T ADD THIS YET):
-            # DomainCredential = $PSCredentialObject  # Injected by Run_BuildMain.ps1
-            
-            # CERTIFICATE ENCRYPTION (Production pattern - informational for now):
-            # CertificateFile = 'C:\Certs\DscPublicKey.cer'  # Public key for MOF encryption
-            # Thumbprint = '1234567890ABCDEF...'            # Certificate thumbprint
-            # PsDscAllowPlainTextPassword = $false           # Force encryption (production)
+            PsDscAllowDomainUser        = $true
         }
     )
 }
