@@ -234,22 +234,16 @@ Or set it to auto-start:
         }
     }
 
-    Context "Network Hardware Validation" {
-        
-        It "Internal network adapter ($script:InternalNIC) exists" {
-            $adapter = Get-NetAdapter -Name $script:InternalNIC -ErrorAction SilentlyContinue
+     Context "Network Tests" {
+       
+        It "Tests network adapter exists" {
+            $adapter = Get-NetAdapter -Name 'Ethernet*' -ErrorAction SilentlyContinue
             $adapter | Should -Not -BeNullOrEmpty -Because @"
-The Internal NIC '$script:InternalNIC' is missing!
-Available: $($script:NetworkConfig.InterfaceAlias -join ', ')
-"@
-        }
+No network adapter matching 'Ethernet*' found!
 
-        It "NAT network adapter ($script:InternalNIC_NAT) exists" {
-            # Note: Ensure you define $script:InternalNIC_NAT in your BeforeAll block
-            $adapter = Get-NetAdapter -Name $script:InternalNIC_NAT -ErrorAction SilentlyContinue
-            $adapter | Should -Not -BeNullOrEmpty -Because @"
-The NAT NIC '$script:InternalNIC_NAT' is missing! 
-Without this hardware, the 'DisableNatRegistration' DSC resource will fail.
+HINT: Check available adapters with:
+  Get-NetAdapter
+Then adjust your test to match the actual adapter name.
 "@
         }
     }

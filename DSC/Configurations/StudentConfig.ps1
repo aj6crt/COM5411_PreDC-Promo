@@ -49,78 +49,45 @@ Configuration StudentBaseline {
     )
 
     Import-DscResource -ModuleName PSDesiredStateConfiguration
-    Import-DscResource -ModuleName ComputerManagementDsc
+    Import-DscResource -ModuleName ComputerManagementDSC
+    Import-DscResource -ModuleName ActiveDirectoryDSC
     Import-DscResource -ModuleName NetworkingDsc
-    Import-DscResource -ModuleName ActiveDirectoryDsc
 
     Node $AllNodes.NodeName {
-
-        Computer SetComputerName {
-            Name = $Node.ComputerName
-        }
-        
-
-        TimeZone SetTimeZone {
-            IsSingleInstance = 'Yes'
-            TimeZone         = $Node.TimeZone
-        }
-
-        IPAddress SetInternalIP {
-            InterfaceAlias = $Node.InterfaceAlias_Internal
+        # --- Networking (Aligned to NetworkingDsc 9.0.0) ---
+        IPAddress InternalStaticIP {
+            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
-            IPAddress      = $Node.IPv4Address_Internal
-            DependsOn      = '[Computer]SetComputerName'
+            IPAddress      = $AllNodes.IPv4Address_Internal # Exact match for your 9.0.0 module
         }
 
-        DnsServerAddress SetInternalDns {
-            InterfaceAlias = $Node.InterfaceAlias_Internal
+        DNSServerAddress InternalDNS {
+            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
-            Address        = $Node.DNSServers_Internal
-            DependsOn      = '[IPAddress]SetInternalIP'
+            Address        = $AllNodes.DnsServers_Internal # Exact match for your 9.0.0 module
+            DependsOn      = '[IPAddress]InternalStaticIP'
         }
 
-        Get-DnsClient DisableNatRegistration {
-            InterfaceAlias                 = $Node.InterfaceAlias_NAT
-            RegisterThisConnectionsAddress = $false
-            DependsOn                      = '[DnsServerAddress]SetInternalDns'
+        # --- Active Directory (Aligned to ADDS 6.6.0) ---
+        WindowsFeature ADDS {
+            Name   = 'AD-Domain-Services'
+            Ensure = 'Present'
         }
 
-        Service WindowsTime {
-            Name        = 'W32Time'
-            State       = 'Running'
-            StartupType = 'Automatic'
-            DependsOn   = '[TimeZone]SetTimeZone'
+        WindowsFeature RSATADDS {
+            Name   = 'RSAT-AD-Tools'
+            Ensure = 'Present'
         }
 
-        if ($Node.InstallADDSRole) {
-            WindowsFeature ADDS {
-                Name   = 'AD-Domain-Services'
-                Ensure = 'Present'
-            }
-        }
-
-        if ($Node.InstallRSATADDS) {
-            WindowsFeature RSAT-ADDS {
-                Name      = 'RSAT-ADDS'
-                Ensure    = 'Present'
-                DependsOn = '[WindowsFeature]ADDS'
-            }
-        }
-
-        ADDomain CreateForest {
-            DomainName                    = $Node.DomainName
-            DomainNetBIOSName             = $Node.DomainNetBIOSName
-            Credential                    = $DomainAdminCredential
-            SafemodeAdministratorPassword = $DsrmCredential
-            ForestMode                    = $Node.ForestMode
-            DomainMode                    = $Node.DomainMode
-            DatabasePath                  = 'C:\Windows\NTDS'
-            LogPath                       = 'C:\Windows\NTDS'
-            SysvolPath                    = 'C:\Windows\SYSVOL'
-            # COMBINED AND FIXED NAMES BELOW
-            DependsOn                     = @('[WindowsFeature]RSAT-ADDS', '[DnsServerAddress]SetInternalDns')
+        ADDomain BarmBuzzDomain {
+            DomainName                    = $AllNodes.DomainName
+            DomainNetbiosName             = $AllNodes.DomainNetBIOSName
+            DomainMode                    = $AllNodes.DomainMode
+            ForestMode                    = $AllNodes.ForestMode
+            Credential                    = $DomainAdminCredential # Exact match for your 6.6.0 module
+            SafeModeAdministratorPassword = $DsrmCredential
+            DependsOn                     = @('[WindowsFeature]ADDS', '[DNSServerAddress]InternalDNS')
         }
     }
-
 }
 
