@@ -41,6 +41,8 @@ If you accidentally commit a secret:
 This is not paranoia - this is professional discipline.
 #>
 
+
+
 Configuration StudentBaseline {
     param(
         [PSCredential]$DomainAdminCredential,
@@ -48,27 +50,45 @@ Configuration StudentBaseline {
         [PSCredential]$UserCredential
     )
 
+    # These imports are required for the resources used below
     Import-DscResource -ModuleName PSDesiredStateConfiguration
-    Import-DscResource -ModuleName ComputerManagementDSC
-    Import-DscResource -ModuleName ActiveDirectoryDSC
+    Import-DscResource -ModuleName ComputerManagementDsc
+    Import-DscResource -ModuleName ActiveDirectoryDsc
     Import-DscResource -ModuleName NetworkingDsc
 
     Node $AllNodes.NodeName {
-        # --- Networking (Aligned to NetworkingDsc 9.0.0) ---
+        
+        # --- Networking ---
         IPAddress InternalStaticIP {
-            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
+            InterfaceAlias = $Node.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
-            IPAddress      = $AllNodes.IPv4Address_Internal # Exact match for your 9.0.0 module
+            IPAddress      = $Node.IPv4Address_Internal 
         }
 
         DNSServerAddress InternalDNS {
-            InterfaceAlias = $AllNodes.InterfaceAlias_Internal
+            InterfaceAlias = $Node.InterfaceAlias_Internal
             AddressFamily  = 'IPv4'
-            Address        = $AllNodes.DnsServers_Internal # Exact match for your 9.0.0 module
+            Address        = $Node.DnsServers_Internal 
             DependsOn      = '[IPAddress]InternalStaticIP'
         }
 
-        # --- Active Directory (Aligned to ADDS 6.6.0) ---
+        # Fixes the NAT NIC registration failure in Pester
+        DnsClient DisableNatRegistration 
+        {
+            InterfaceAlias                 = $Node.InterfaceAlias_NAT
+            RegisterThisConnectionsAddress = $false
+            DependsOn                      = '[WindowsFeature]RSATADDS'
+        }
+
+        # Ensures the Domain Controller uses the correct DNS suffix
+        DnsClientGlobalSetting SuffixPreference 
+        {
+            IsSingleInstance = 'Yes'
+            SuffixSearchList = @($Node.DomainName)
+            DependsOn        = '[WindowsFeature]RSATADDS'
+        }
+
+        # --- Active Directory ---
         WindowsFeature ADDS {
             Name   = 'AD-Domain-Services'
             Ensure = 'Present'
@@ -80,14 +100,13 @@ Configuration StudentBaseline {
         }
 
         ADDomain BarmBuzzDomain {
-            DomainName                    = $AllNodes.DomainName
-            DomainNetbiosName             = $AllNodes.DomainNetBIOSName
-            DomainMode                    = $AllNodes.DomainMode
-            ForestMode                    = $AllNodes.ForestMode
-            Credential                    = $DomainAdminCredential # Exact match for your 6.6.0 module
+            DomainName                    = $Node.DomainName
+            DomainNetbiosName             = $Node.DomainNetBIOSName
+            DomainMode                    = $Node.DomainMode
+            ForestMode                    = $Node.ForestMode
+            Credential                    = $DomainAdminCredential 
             SafeModeAdministratorPassword = $DsrmCredential
             DependsOn                     = @('[WindowsFeature]ADDS', '[DNSServerAddress]InternalDNS')
         }
     }
 }
-

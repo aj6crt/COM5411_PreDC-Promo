@@ -250,7 +250,7 @@ DFSR Status: $(if($dfsrService){$dfsrService.Status}else{'Not Found'})
             $currentDomain = $null
             
             try {
-                $computerSystem = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Stop
+                $computerSystem = Get-CimInstance -Class Win32_ComputerSystem -ErrorAction Stop
                 $currentDomain = $computerSystem.Domain
             }
             catch {
