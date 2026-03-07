@@ -1,0 +1,68 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260307144039
+Username: BARMBUZZ\Administrator
+RunAs User: BARMBUZZ\Administrator
+Configuration Name: 
+Machine: BB-DC01 (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 7940
+PSVersion: 5.1.26100.32370
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.32370
+BuildVersion: 10.0.26100.32370
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+[+] Transcript started: Evidence\\Transcripts\\20260307_144039_Run_BuildMain.txt
+[+] Admin privileges confirmed.
+
+[Phase 1] Prerequisites...
+[*] Invoke-BarmBuzz-OneShots: LCM then Network
+[*] LCM already configured (flag present).
+[*] Network already configured (flag present).
+[*] LCM already configured (skipping).
+[*] Network already configured (skipping).
+[+] Phase 1 complete.
+[+] Credentials loaded (hardcoded lab mode *** see warning in comments above ***).
+
+[Phase 2] Compile + Apply DSC...
+[*] Compiling -> DSC\\Outputs\\StudentBaseline
+[*] Compiling via Windows PowerShell 5.1 (GroupPolicyDsc requires it)...
+
+[+] Compilation complete.
+[*] Applying configuration (waits until complete)...
+Perform operation 'Invoke CimMethod' with following parameters, ''methodName' =
+SendConfigurationApply,'className' = MSFT_DSCLocalConfigurationManager,'namespaceName' =
+root/Microsoft/Windows/DesiredStateConfiguration'.
+An LCM method call arrived from computer BB-DC01 with user sid S-1-5-21-552556133-674295360-831726843-500.
+[BB-DC01]: LCM:  [ Start  Set      ]
+[BB-DC01]: LCM:  [ End    Set      ]
+The PowerShell DSC resource DSC_IPAddress from module <NetworkingDsc,9.1.0> does not exist at the PowerShell module 
+path nor is it registered as a WMI DSC resource.
+    + CategoryInfo          : InvalidOperation: (root/Microsoft/...gurationManager:String) [], CimException
+    + FullyQualifiedErrorId : DscResourceNotFound
+    + PSComputerName        : localhost
+The PowerShell DSC resource DSC_IPAddress from module <NetworkingDsc,9.1.0> does not exist at the PowerShell
+module path nor is it registered as a WMI DSC resource.
+    + CategoryInfo          : InvalidOperation: (root/Microsoft/...gurationManager:String) [], CimException
+    + FullyQualifiedErrorId : DscResourceNotFound
+    + PSComputerName        : localhost
+
+Operation 'Invoke CimMethod' complete.
+Time taken for configuration job to complete is 0.475 seconds
+[+] Apply complete.
+
+[Phase 3] Validation...
+[*] Pester validation will be added later.
+
+[+] BUILD SUCCESS
+[*] Next steps (commit outputs + evidence):
+    git add DSC\Outputs Evidence
+    git commit -m \ Build 20260307_144039\
+**********************
+Windows PowerShell transcript end
+End time: 20260307144040
+**********************

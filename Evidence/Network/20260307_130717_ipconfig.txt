@@ -1,0 +1,32 @@
+
+Windows IP Configuration
+
+   Host Name . . . . . . . . . . . . : BB-DC01
+   Primary Dns Suffix  . . . . . . . : barmbuzz.local
+   Node Type . . . . . . . . . . . . : Hybrid
+   IP Routing Enabled. . . . . . . . : No
+   WINS Proxy Enabled. . . . . . . . : No
+   DNS Suffix Search List. . . . . . : barmbuzz.local
+                                       localdomain
+
+Ethernet adapter Ethernet:
+
+   Connection-specific DNS Suffix  . : localdomain
+   Description . . . . . . . . . . . : Intel(R) 82574L Gigabit Network Connection
+   Physical Address. . . . . . . . . : 00-0C-29-9D-90-DE
+   DHCP Enabled. . . . . . . . . . . : Yes
+   Autoconfiguration Enabled . . . . : Yes
+   Link-local IPv6 Address . . . . . : fe80::ca1f:36eb:ef55:dcc5%4(Preferred) 
+   IPv4 Address. . . . . . . . . . . : 192.168.32.131(Preferred) 
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Lease Obtained. . . . . . . . . . : 07 March 2026 13:03:48
+   Lease Expires . . . . . . . . . . : 07 March 2026 13:33:48
+   Default Gateway . . . . . . . . . : 192.168.32.2
+   DHCP Server . . . . . . . . . . . : 192.168.32.254
+   DHCPv6 IAID . . . . . . . . . . . : 100666409
+   DHCPv6 Client DUID. . . . . . . . : 00-01-00-01-31-39-2B-BF-00-0C-29-9D-90-DE
+   DNS Servers . . . . . . . . . . . : ::1
+                                       8.8.8.8
+                                       8.8.4.4
+   Primary WINS Server . . . . . . . : 192.168.32.2
+   NetBIOS over Tcpip. . . . . . . . : Enabled
