@@ -1,0 +1,60 @@
+**********************
+PowerShell transcript start
+Start time: 20260308155656
+Username: BARMBUZZ\Administrator
+RunAs User: BARMBUZZ\Administrator
+Configuration Name: 
+Machine: BB-DC01 (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -noexit -command try { . "c:\Users\Administrator\AppData\Local\Programs\Microsoft VS Code\072586267e\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+Process ID: 3760
+PSVersion: 7.5.4
+PSEdition: Core
+GitCommitId: 7.5.4
+OS: Microsoft Windows 10.0.26100
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+[+] Transcript started: Evidence\\Transcripts\\20260308_155656_Run_BuildMain.txt
+[+] Admin privileges confirmed.
+
+[Phase 1] Prerequisites...
+[*] Invoke-BarmBuzz-OneShots: LCM then Network
+[*] LCM already configured (flag present).
+[*] Network already configured (flag present).
+[*] LCM already configured (skipping).
+[*] Network already configured (skipping).
+[+] Phase 1 complete.
+[+] Credentials loaded (hardcoded lab mode *** see warning in comments above ***).
+
+[Phase 2] Compile + Apply DSC...
+[*] Compiling -> DSC\\Outputs\\StudentBaseline
+[*] Compiling via Windows PowerShell 5.1 (GroupPolicyDsc requires it)...
+PSDesiredStateConfiguration\Node : The term 'ADGPORegistryValue' is not recognized as the name of a
+cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was
+included, verify that the path is correct and try again.
+At C:\Dev\Repo\COM5411_PreDC-Promo\DSC\Configurations\StudentConfig.ps1:7 char:5
++     Node $AllNodes.NodeName {
++     ~~~~
+    + CategoryInfo          : ObjectNotFound: (ADGPORegistryValue:String) [PSDesiredStateConfiguratio
+   n\node], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : CommandNotFoundException,PSDesiredStateConfiguration\node
+
+Compilation errors occurred while processing configuration 'StudentBaseline'. Please review the
+errors reported in error stream and modify your configuration code appropriately.
+At C:\Windows\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PSDesiredStateConfig
+uration.psm1:3917 char:5
++     throw $ErrorRecord
++     ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (StudentBaseline:String) [], InvalidOperationExceptio
+   n
+    + FullyQualifiedErrorId : FailToProcessConfiguration
+
+[-] BUILD FAILED
+Message: MOF compilation failed in PS5.1 (exit code 1). Check StudentConfig.ps1 and AllNodes.psd1.
+**********************
+PowerShell transcript end
+End time: 20260308155704
+**********************

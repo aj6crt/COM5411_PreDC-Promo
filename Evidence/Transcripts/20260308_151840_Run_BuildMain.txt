@@ -1,0 +1,54 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260308151840
+Username: BARMBUZZ\Administrator
+RunAs User: BARMBUZZ\Administrator
+Configuration Name: 
+Machine: BB-DC01 (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 6348
+PSVersion: 5.1.26100.32370
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.32370
+BuildVersion: 10.0.26100.32370
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+[+] Transcript started: Evidence\\Transcripts\\20260308_151840_Run_BuildMain.txt
+[+] Admin privileges confirmed.
+
+[Phase 1] Prerequisites...
+[*] Invoke-BarmBuzz-OneShots: LCM then Network
+[*] LCM already configured (flag present).
+[*] Network already configured (flag present).
+[*] LCM already configured (skipping).
+[*] Network already configured (skipping).
+[+] Phase 1 complete.
+[+] Credentials loaded (hardcoded lab mode *** see warning in comments above ***).
+
+[Phase 2] Compile + Apply DSC...
+Import-PowerShellDataFile : The file 'C:\Dev\Repo\COM5411_PreDC-Promo\DSC\Data\AllNodes.psd1' could not be parsed as a 
+PowerShell Data File.
+At C:\Dev\Repo\COM5411_PreDC-Promo\Run_BuildMain.ps1:251 char:19
++     $ConfigData = Import-PowerShellDataFile -Path $StudentDataFile
++                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Import-PowerShellDataFile], InvalidOperationException
+    + FullyQualifiedErrorId : CouldNotParseAsPowerShellDataFile,Import-PowerShellDataFile
+Import-PowerShellDataFile : The file 'C:\Dev\Repo\COM5411_PreDC-Promo\DSC\Data\AllNodes.psd1' could not be
+parsed as a PowerShell Data File.
+At C:\Dev\Repo\COM5411_PreDC-Promo\Run_BuildMain.ps1:251 char:19
++     $ConfigData = Import-PowerShellDataFile -Path $StudentDataFile
++                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Import-PowerShellDataFile], InvalidOperationException
+    + FullyQualifiedErrorId : CouldNotParseAsPowerShellDataFile,Import-PowerShellDataFile
+
+PS>TerminatingError(Assert-AllNodesData): "Cannot bind argument to parameter 'ConfigData' because it is null."
+
+[-] BUILD FAILED
+Message: Cannot bind argument to parameter 'ConfigData' because it is null.
+**********************
+Windows PowerShell transcript end
+End time: 20260308151841
+**********************

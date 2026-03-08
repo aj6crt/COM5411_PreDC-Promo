@@ -1,93 +1,122 @@
-Configuration StudentBaseline {
-    param(
-        [PSCredential]$DomainAdminCredential,
-        [PSCredential]$DsrmCredential,
-        [PSCredential]$UserCredential
-    )
-
-    Import-DscResource -ModuleName PSDesiredStateConfiguration, ActiveDirectoryDsc, NetworkingDsc
+Configuration BarmBuzz_Final_Build {
+    Import-DscResource -ModuleName PSDesiredStateConfiguration
+    Import-DscResource -ModuleName ActiveDirectoryDsc
+    Import-DscResource -ModuleName NetworkingDsc
+    Import-DscResource -ModuleName ComputerManagementDsc
 
     Node $AllNodes.NodeName {
-        # 1. Promote Domain [cite: 266]
-        WindowsFeature ADDS { Name = 'AD-Domain-Services'; Ensure = 'Present' }
-        ADDomain BarmBuzzDomain {
-            DomainName = $Node.DomainName; DomainNetbiosName = $Node.DomainNetBIOSName;
-            Credential = $DomainAdminCredential; SafeModeAdministratorPassword = $DsrmCredential;
-            DependsOn = '[WindowsFeature]ADDS'
-        }
-        WaitForADDomain Wait { DomainName = $Node.DomainName; Credential = $DomainAdminCredential; DependsOn = '[ADDomain]BarmBuzzDomain' }
 
-        # 2. AD Sites and Subnets [cite: 204]
-        foreach ($site in $Node.ADSites) {
-            ADSite "Site_$($site.Name)" { Name = $site.Name; Ensure = 'Present'; Credential = $DomainAdminCredential; DependsOn = '[WaitForADDomain]Wait' }
-        }
-        foreach ($sub in $Node.ADSubnets) {
-            ADSubnet "Subnet_$($sub.Name -replace '/','_')" { Name = $sub.Name; Site = $sub.Site; Ensure = 'Present'; Credential = $DomainAdminCredential; DependsOn = "[ADSite]Site_$($sub.Site)" }
+        # 1. Rename and Network Prep
+        ComputerManagementDsc\ComputerName RenameNode {
+            ComputerName = $Node.ComputerName
         }
 
-        # 3. Domain Password Policy
-        ADDomainDefaultPasswordPolicy SetPasswordPolicy {
-            DomainName                  = $Node.DomainName
-            ComplexityEnabled           = $Node.PasswordPolicy.ComplexityEnabled
-            MinPasswordLength           = $Node.PasswordPolicy.MinPasswordLength
-            PasswordHistoryCount        = $Node.PasswordPolicy.PasswordHistoryCount
-            MaxPasswordAge              = $Node.PasswordPolicy.MaxPasswordAge
-            MinPasswordAge              = $Node.PasswordPolicy.MinPasswordAge
-            LockoutThreshold            = $Node.PasswordPolicy.LockoutThreshold
-            LockoutDuration             = $Node.PasswordPolicy.LockoutDuration
-            LockoutObservationWindow    = $Node.PasswordPolicy.LockoutObservationWindow
-            ReversibleEncryptionEnabled = $Node.PasswordPolicy.ReversibleEncryptionEnabled
-            Credential                  = $DomainAdminCredential
-            DependsOn                   = '[WaitForADDomain]Wait'
+        NetworkingDsc\IPAddress InternalIP {
+            InterfaceAlias = $Node.InterfaceAlias_Internal
+            IPAddress      = $Node.IPv4Address_Internal
+            PrefixLength   = $Node.PrefixLength_Internal
+            AddressFamily  = 'IPv4'
         }
 
-        # 4. Organizational Units [cite: 266]
-        foreach ($ou in $Node.OrganizationalUnits) {
-            $path = if ($ou.ParentPath) { "$($ou.ParentPath), $($Node.DomainDN)" } else { $Node.DomainDN }
-            ADOrganizationalUnit "OU_$($ou.Key)" {
-                Name = $ou.Name; Path = $path; ProtectedFromAccidentalDeletion = $ou.Protected; Ensure = 'Present'; Credential = $DomainAdminCredential;
-                DependsOn = if ($ou.DependsOnKey) { "[ADOrganizationalUnit]OU_$($ou.DependsOnKey)" } else { "[WaitForADDomain]Wait" }
+        # 2. Domain Promotion
+        ActiveDirectoryDsc\ADDomain CreateForest {
+            DomainName                    = $Node.DomainName
+            DomainNetbiosName             = $Node.DomainNetBIOSName
+            SafeModeAdministratorPassword = $ConfigurationData.NonNodeData.SafeModePassword
+            DomainAdministratorCredential = $ConfigurationData.NonNodeData.AdminCreds
+            ForestMode                    = $Node.ForestMode
+            DomainMode                    = $Node.DomainMode
+            DependsOn                     = "[IPAddress]InternalIP"
+        }
+
+        # 3. Build OU Hierarchy
+        foreach ($OU in $Node.OrganizationalUnits) {
+            ActiveDirectoryDsc\ADOrganizationalUnit "OU_$($OU.Key)" {
+                Name       = $OU.Name
+                Path       = if ($OU.ParentPath -eq '') { $Node.DomainDN } else { "$($OU.ParentPath),$($Node.DomainDN)" }
+                Protected  = $OU.Protected
+                Description = $OU.Description
+                DependsOn  = "[ADDomain]CreateForest"
             }
         }
 
-        # 5. Security Groups [cite: 266]
-        foreach ($grp in $Node.SecurityGroups) {
-            ADGroup "Group_$($grp.Key)" {
-                GroupName = $grp.GroupName; GroupScope = $grp.GroupScope; Category = $grp.Category;
-                Path = "$($grp.OUPath), $($Node.DomainDN)"; Ensure = 'Present'; Credential = $DomainAdminCredential;
-                DependsOn = "[ADOrganizationalUnit]OU_$($grp.DependsOnOUKey)"
+        # 4. Security Groups (AGDLP)
+        foreach ($Group in $Node.SecurityGroups) {
+            ActiveDirectoryDsc\ADGroup "Group_$($Group.Key)" {
+                GroupName  = $Group.GroupName
+                GroupScope = $Group.GroupScope
+                Category   = $Group.Category
+                Path       = "OU=Groups,OU=BarmBuzz,$($Node.DomainDN)"
+                DependsOn  = "[ADOrganizationalUnit]OU_Groups"
             }
         }
 
-        # 6. Users & Membership (Idempotent Script Resource)
-        foreach ($user in $Node.ADUsers) {
-            ADUser "User_$($user.Key)" {
-                UserName = $user.UserName; Path = "$($user.OUPath), $($Node.DomainDN)"; Password = $UserCredential;
-                Enabled = $true; Ensure = 'Present'; Credential = $DomainAdminCredential;
-                DependsOn = "[ADOrganizationalUnit]OU_$($user.DependsOnOUKey)"
+        # 5. Active Directory Users & Memberships
+        foreach ($User in $Node.ADUsers) {
+            ActiveDirectoryDsc\ADUser "User_$($User.Key)" {
+                UserName              = $User.UserName
+                GivenName             = $User.GivenName
+                Surname               = $User.Surname
+                DisplayName           = $User.DisplayName
+                UserPrincipalName     = $User.UserPrincipalName
+                Path                  = "$($User.OUPath),$($Node.DomainDN)"
+                Password              = $ConfigurationData.NonNodeData.UserPassword
+                DependsOn             = "[ADOrganizationalUnit]OU_$($User.DependsOnOUKey)"
             }
 
-            foreach ($groupName in $user.GroupMembership) {
-                $grpEntry = $Node.SecurityGroups | Where-Object { $_.GroupName -eq $groupName }
-                $uName = $user.UserName; $gName = $groupName
-                Script "Add_$($user.Key)_to_$($gName)" {
-                    GetScript = { return @{ Result = 'N/A' } }
-                    TestScript = { (Get-ADGroupMember -Identity $using:gName).SamAccountName -contains $using:uName }
-                    SetScript = { Add-ADGroupMember -Identity $using:gName -Members $using:uName }
-                    DependsOn = @("[ADUser]User_$($user.Key)", "[ADGroup]Group_$($grpEntry.Key)")
+            # Add User to their defined Groups
+            foreach ($GroupName in $User.GroupMembership) {
+                ActiveDirectoryDsc\ADGroupMember "Add_$($User.Key)_to_$($GroupName)" {
+                    GroupName   = $GroupName
+                    Members     = $User.UserName
+                    DependsOn   = "[ADUser]User_$($User.Key)"
                 }
             }
         }
 
-        # 7. Permission Delegations
-        foreach ($deleg in $Node.Delegations) {
-            ADObjectPermissionEntry $deleg.Key {
-                Path = "$($deleg.TargetOUPath), $($Node.DomainDN)"; IdentityReference = "$($Node.DomainNetBIOSName)\$($deleg.IdentityGroupName)";
-                ActiveDirectoryRights = $deleg.Rights; AccessControlType = $deleg.AccessControlType;
-                ObjectType = $deleg.ObjectTypeGuid; ActiveDirectorySecurityInheritance = $deleg.InheritanceType;
-                InheritedObjectType = $deleg.InheritedObjectType; Ensure = 'Present';
-                DependsOn = @("[ADGroup]Group_$($deleg.DependsOnGroupKey)", "[ADOrganizationalUnit]OU_$($deleg.DependsOnOUKey)")
+        # 6. Group Policy Objects
+        foreach ($GPO in $Node.GroupPolicies) {
+            ActiveDirectoryDsc\ADGpo "GPO_$($GPO.Key)" {
+                DisplayName = $GPO.Name
+                DomainName  = $Node.DomainName
+                DependsOn   = "[ADDomain]CreateForest"
+            }
+        }
+
+        # 7. GPO Registry Values (The Hardening Settings)
+        foreach ($Reg in $Node.GPORegistryValues) {
+            ActiveDirectoryDsc\ADGpoRegistryValue "Reg_$($Reg.Key)" {
+                GpoName    = $Reg.GPOName
+                Key        = $Reg.RegistryKey
+                ValueName  = $Reg.ValueName
+                ValueType  = $Reg.ValueType
+                ValueData  = $Reg.ValueData
+                DependsOn  = "[ADGpo]GPO_$($Reg.DependsOnGPO)"
+            }
+        }
+
+        # 8. THE MISSING LINK: GPO OU Links
+        foreach ($Link in $Node.GPOLinks) {
+            ActiveDirectoryDsc\ADGpoLink "Link_$($Link.Key)" {
+                GpoName      = $Link.GPOName
+                TargetDN     = "$($Link.TargetOUPath),$($Node.DomainDN)"
+                Order        = $Link.Order
+                Enforced     = $Link.Enforced
+                Enabled      = $Link.LinkEnabled
+                DependsOn    = @("[ADGpo]GPO_$($Link.DependsOnGPO)", "[ADOrganizationalUnit]OU_$($Link.DependsOnOUKey)")
             }
         }
     }
 }
+
+# --- Execution Block (Student Lab Settings) ---
+$ConfigData = @{
+    AllNodes = $AllNodes # This injects your provided hash table
+    NonNodeData = @{
+        AdminCreds       = [PSCredential]::new("Administrator", (ConvertTo-SecureString "StudentPass123!" -AsPlainText -Force))
+        SafeModePassword = (ConvertTo-SecureString "RecoveryPass123!" -AsPlainText -Force)
+        UserPassword     = (ConvertTo-SecureString "BarmBuzz2026!" -AsPlainText -Force)
+    }
+}
+
+BarmBuzz_Final_Build -ConfigurationData $ConfigData
