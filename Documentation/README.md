@@ -1,120 +1,16 @@
-# Documentation
+The BarmBuzz Enterprise infrastructure is built on a multi-site logical topology centered around the BB-DC01 domain controller, serving as the forest root for barmbuzz.local. To ensure a secure and scalable environment, the architecture employs a tiered administrative model based on the Principle of Least Privilege. This is physically manifested through a hierarchical Organizational Unit (OU) structure that separates the Tier0 control plane from regional operations in Bolton, Leeds, and Stoke. By isolating site-specific resources, the design ensures that administrative authority is granular; for example, IT staff in Leeds are restricted from modifying objects within the Bolton OU. Furthermore, the separation of user profiles and workstation objects allows for targeted Group Policy application, such as hardening Point-of-Sale (POS) terminals without restricting the mobility of staff user accounts.
 
-Use these files for your written artefacts:
-- Runbook.md: what you did, week by week
-- DesignNotes.md: why you designed it this way
-######
-Internet-NAT (Ethernet0): This provides the server with internet connectivity for downloading Windows updates and installing roles.
+Identity and access management are standardized using the AGDLP (Account, Global, Domain Local, Permissions) model. Under this framework, individual accounts like ava.barista and charlie.helpdesk are nested into Global Groups based on their roles, which are then mapped to Domain Local groups that govern specific resource permissions, such as read/write access to corporate recipes. A key element of this strategy is the delegation of control, where the GG_BB_IT_Helpdesk group is granted specific rights to manage computer objects within the Bolton workstation OU. This allows technical support to maintain store hardware and join machines to the domain without requiring high-level Domain Admin privileges, significantly reducing the attack surface of the directory.
 
-#Internal-Static (Ethernet1): This is the private "lab" network where your Active Directory and other VMs will live.
-######
+Security is enforced through a series of risk-based controls and Group Policy Objects (GPOs) engineered for environment hardening. To mitigate unauthorized access, a corporate legal banner is linked at the domain root, mandating that all users acknowledge the Acceptable Use Policy upon login. High-risk environments, specifically the POS terminals, are secured with an enforced lockdown policy that disables USB storage via registry modifications to prevent data exfiltration or malware injection. The identity perimeter is further bolstered by a Fine-Grained Password Policy requiring a minimum of 10 characters and strict lockout thresholds. Additionally, at the network layer, the PowerShell DSC configuration explicitly disables DNS registration on the NAT-facing adapter to prevent internal Active Directory metadata from leaking onto public-facing interfaces.
 
+The deployment itself is managed entirely through PowerShell Desired State Configuration (DSC), which serves as the "single source of truth" for the infrastructure. The configuration is split into a Data Plane, which defines the dual-NIC networking parameters and registry-level hardening (such as disabling SMBv1 and LM hashes), and a Logic Plane that handles the actual system state. This automated process oversees the pre-promotion OS baseline, the initialization of the forest root, the creation of thirteen distinct OUs with accidental deletion protection, and the subsequent provisioning of all groups and GPO links. This automated approach ensures that the environment is consistent, repeatable, and compliant with the BarmBuzz Infrastructure Standard from the moment of first boot.
 
-### README: AD Automation IaC Environment ###
-
-#### Overview ####
-
-This repository contains the Infrastructure-as-Code (IaC) configurations and testing suite for automating an Active Directory (AD) environment. 
-
-#### Core Technology Stack ####
-
-Engine: Microsoft Desired State Configuration (DSC) v3 (dsc.exe).
-
-Orchestration: PowerShell 7.1+ (Core).
-
-Legacy Support: Windows PowerShell 5.1 (via DSC Compatibility Adapter).
-
-Validation: Pester 5.7.1 testing framework.
-
-Version Control: Git with GPG commit signing for identity verification.
-
-Micrsoft Visual Code
-
-##### Environment Design #####
+Throughout the deployment phase, several critical technical hurdles were identified and resolved to ensure production readiness. Initial DSC compilation errors were traced to missing schema files within the NetworkingDsc module, while early Pester test failures were mitigated by allowing the AD promotion to fully initialize before running validation scripts. Operational issues, such as the inability to delete OUs due to the "accidental deletion" flag and non-critical service alerts in Server Manager, were addressed through manual attribute adjustments and service trigger optimizations. Following these final validations, the domain is confirmed as fully operational, with all GPOs enforced and the administrative delegation verified.
 
 
- Infrastructure is defined in YAML/JSON files, which serve as the single source of truth.
+#####
 
-The system checks current state vs. desired state; changes are only applied if "drift" is detected.
+Ihave used Ai to summarise my ai chat conversation
 
-Dev Machine: Windows 11 with VS Code and RSAT tools.
-
-Windows Server 2025 (Standard/Datacentre) with a Static IP.
-
-##### Required Modules #####
-
-The following modules must be installed in C:\Program Files\WindowsPowerShell\Modules to be accessible by both PowerShell engines:
-
-ActiveDirectoryDsc (v6.6.0): For AD domain and object orchestration.
-
-GroupPolicyDsc (v1.0.3): For declarative GPO management.
-
-PSDesiredStateConfiguration: For common OS features (files, registry, etc.).
-
-ComputerManagementDsc: For handling pending reboots.
-
-### Workflow ###
-
-Code: Author desired state in a YAML configuration file.
-
-Deploy: Execute dsc config apply (on-demand) to enforce the state.
-
-Commit: Stage and commit changes to Git using GPG signing.
-
-Verify: Run Pester tests to validate that the physical infrastructure matches the code.
-
-### Project Progress: Active Directory Domain Services (AD DS) Promotion Lab ###
-
-Networking Strategy: Configured a dual-NIC environment consisting of an Internal-Static interface for domain traffic and a NAT interface for external connectivity.
-
-Active Directory Setup: Defined the ADDomain resource to create a new forest with specified DomainName and DomainNetBIOSName
-
-Dependency Mapping: Implemented DependsOn logic to ensure networking is stable (IP and DNS) before the Active Directory role is installed or promoted.
-
-### ### Troubleshooting & Applied Fixes ###
-
-During the build process, several "Build Killer" issues were identified and resolved:
-
-1. DSC Compilation & Module Resolution
-
-# The Issue: 
-The compiler (PowerShell 5.1) failed to find modules like ComputerManagementDsc and NetworkingDsc due to path ambiguity between PowerShell 7 and 5.1.
-
-# The Fix:
-
-Updated Import-DscResource to use version pinning (e.g., ModuleVersion = '9.1.0') or simplified imports to match the system path.
-
-2. Structural Syntax (Brace Management)
-
-# The Issue:
-
-Misplaced or missing closing braces (}) at lines 44 and 61 caused "orphaned" resources and PositionalParameterNotFound errors.
-
-# The Fix:
-
-Nested all resources (Computer, TimeZone, IPAddress, DnsClient) strictly within the Node $AllNodes.NodeName { ... } block.
-
-3. Active Directory Prerequisites
-
-# The Issue:
-
-The promotion phase failed because the local Administrator password was blank, which is forbidden for Domain Controllers.
-
-# The Fix
-
-Executed net user Administrator superw1n_user to secure the account before promotion.
-
-### Current Status: Validation Phase
-
-i have multiple errors that stopping me from promoting my server to Domian Controller.
-
-1. NAT NIC 
-
-2. AD DS promotion failed and has win32eXCEPTION
-
-3. DNS is still not working
-
-
-
-
-
+####
