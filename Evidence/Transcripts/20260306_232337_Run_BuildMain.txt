@@ -1,0 +1,111 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260306232337
+Username: BARMBUZZ\Administrator
+RunAs User: BARMBUZZ\Administrator
+Configuration Name: 
+Machine: BB-DC01 (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 6868
+PSVersion: 5.1.26100.32370
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.32370
+BuildVersion: 10.0.26100.32370
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+[+] Transcript started: Evidence\\Transcripts\\20260306_232337_Run_BuildMain.txt
+[+] Admin privileges confirmed.
+
+[Phase 1] Prerequisites...
+[*] Invoke-BarmBuzz-OneShots: LCM then Network
+[*] LCM already configured (flag present).
+[*] Network already configured (flag present).
+[*] LCM already configured (skipping).
+[*] Network already configured (skipping).
+[+] Phase 1 complete.
+[+] Credentials loaded (hardcoded lab mode *** see warning in comments above ***).
+
+[Phase 2] Compile + Apply DSC...
+[*] Compiling -> DSC\\Outputs\\StudentBaseline
+[*] Compiling via Windows PowerShell 5.1 (GroupPolicyDsc requires it)...
+
+[+] Compilation complete.
+[*] Applying configuration (waits until complete)...
+Perform operation 'Invoke CimMethod' with following parameters, ''methodName' =
+SendConfigurationApply,'className' = MSFT_DSCLocalConfigurationManager,'namespaceName' =
+root/Microsoft/Windows/DesiredStateConfiguration'.
+An LCM method call arrived from computer BB-DC01 with user sid S-1-5-21-552556133-674295360-831726843-500.
+[BB-DC01]: LCM:  [ Start  Set      ]
+[BB-DC01]: LCM:  [ Start  Resource ]  [[IPAddress]InternalStaticIP]
+[BB-DC01]: LCM:  [ Start  Test     ]  [[IPAddress]InternalStaticIP]
+[BB-DC01]:                            [[IPAddress]InternalStaticIP] Test-TargetResource: Checking the IP
+Address.
+[BB-DC01]:                            [[IPAddress]InternalStaticIP] Test-TargetResource: IP Address is in
+desired state.
+[BB-DC01]:                            [[IPAddress]InternalStaticIP] Test-TargetResource: Prefix Length is in
+desired state.
+[BB-DC01]: LCM:  [ End    Test     ]  [[IPAddress]InternalStaticIP]  in 2.4090 seconds.
+[BB-DC01]: LCM:  [ Skip   Set      ]  [[IPAddress]InternalStaticIP]
+[BB-DC01]: LCM:  [ End    Resource ]  [[IPAddress]InternalStaticIP]
+[BB-DC01]: LCM:  [ Start  Resource ]  [[DnsServerAddress]InternalDNS]
+[BB-DC01]: LCM:  [ Start  Test     ]  [[DnsServerAddress]InternalDNS]
+[BB-DC01]:                            [[DnsServerAddress]InternalDNS] Test-TargetResource: Checking the DNS
+server addresses.
+[BB-DC01]:                            [[DnsServerAddress]InternalDNS] Get-DnsClientServerStaticAddress:
+Getting statically assigned DNS server IPv4 address for interface alias 'Ethernet 2'. (NETC0008)
+[BB-DC01]:                            [[DnsServerAddress]InternalDNS] Get-DnsClientServerStaticAddress:
+Statically assigned DNS server IPv4 address for interface alias 'Ethernet 2' is '127.0.0.1'. (NETC0013)
+[BB-DC01]:                            [[DnsServerAddress]InternalDNS] Test-TargetResource: DNS server
+addresses are set correctly.
+[BB-DC01]: LCM:  [ End    Test     ]  [[DnsServerAddress]InternalDNS]  in 0.1830 seconds.
+[BB-DC01]: LCM:  [ Skip   Set      ]  [[DnsServerAddress]InternalDNS]
+[BB-DC01]: LCM:  [ End    Resource ]  [[DnsServerAddress]InternalDNS]
+[BB-DC01]: LCM:  [ Start  Resource ]  [[WindowsFeature]ADDS]
+[BB-DC01]: LCM:  [ Start  Test     ]  [[WindowsFeature]ADDS]
+[BB-DC01]:                            [[WindowsFeature]ADDS] The operation 'Get-WindowsFeature' started:
+AD-Domain-Services
+[BB-DC01]:                            [[WindowsFeature]ADDS] The operation 'Get-WindowsFeature' succeeded:
+AD-Domain-Services
+[BB-DC01]: LCM:  [ End    Test     ]  [[WindowsFeature]ADDS]  in 1.3310 seconds.
+[BB-DC01]: LCM:  [ Skip   Set      ]  [[WindowsFeature]ADDS]
+[BB-DC01]: LCM:  [ End    Resource ]  [[WindowsFeature]ADDS]
+[BB-DC01]: LCM:  [ Start  Resource ]  [[WindowsFeature]RSATADDS]
+[BB-DC01]: LCM:  [ Start  Test     ]  [[WindowsFeature]RSATADDS]
+[BB-DC01]:                            [[WindowsFeature]RSATADDS] The operation 'Get-WindowsFeature' started:
+RSAT-AD-Tools
+[BB-DC01]:                            [[WindowsFeature]RSATADDS] The operation 'Get-WindowsFeature'
+succeeded: RSAT-AD-Tools
+[BB-DC01]: LCM:  [ End    Test     ]  [[WindowsFeature]RSATADDS]  in 0.6260 seconds.
+[BB-DC01]: LCM:  [ Skip   Set      ]  [[WindowsFeature]RSATADDS]
+[BB-DC01]: LCM:  [ End    Resource ]  [[WindowsFeature]RSATADDS]
+[BB-DC01]: LCM:  [ Start  Resource ]  [[ADDomain]BarmBuzzDomain]
+[BB-DC01]: LCM:  [ Start  Test     ]  [[ADDomain]BarmBuzzDomain]
+[BB-DC01]:                            [[ADDomain]BarmBuzzDomain] Querying for domain 'barmbuzz.local'.
+(ADD0001)
+[BB-DC01]:                            [[ADDomain]BarmBuzzDomain] Active Directory domain 'barmbuzz.local'
+found. (ADD0003)
+[BB-DC01]:                            [[ADDomain]BarmBuzzDomain] The domain 'barmbuzz.local' is in the
+desired state. (ADD0008)
+[BB-DC01]: LCM:  [ End    Test     ]  [[ADDomain]BarmBuzzDomain]  in 1.1950 seconds.
+[BB-DC01]: LCM:  [ Skip   Set      ]  [[ADDomain]BarmBuzzDomain]
+[BB-DC01]: LCM:  [ End    Resource ]  [[ADDomain]BarmBuzzDomain]
+[BB-DC01]: LCM:  [ End    Set      ]
+[BB-DC01]: LCM:  [ End    Set      ]    in  7.1840 seconds.
+Operation 'Invoke CimMethod' complete.
+Time taken for configuration job to complete is 7.47 seconds
+[+] Apply complete.
+
+[Phase 3] Validation...
+[*] Pester validation will be added later.
+
+[+] BUILD SUCCESS
+[*] Next steps (commit outputs + evidence):
+    git add DSC\Outputs Evidence
+    git commit -m \ Build 20260306_232337\
+**********************
+Windows PowerShell transcript end
+End time: 20260306232346
+**********************

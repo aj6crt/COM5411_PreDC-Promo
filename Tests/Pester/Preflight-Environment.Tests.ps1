@@ -55,9 +55,9 @@ Describe "COM5411 IaC Environment Preflight (Dual-Shell)" {
         # NOTE: PSDesiredStateConfiguration 2.0.7 requires PS 6.1+ and won't load in WinPS 5.1
         # So we test it separately for PS7 only
         $Pinned = @{
-            ActiveDirectoryDsc          = [version]'6.6.0'
-            GroupPolicyDsc              = [version]'1.0.3'
-            Pester                      = [version]'5.7.1'
+            ActiveDirectoryDsc = [version]'6.7.1'
+            GroupPolicyDsc = [version]'1.0.3'
+            Pester = [version]'5.7.1'
         }
 
         # PS7-only modules (won't work in Windows PowerShell 5.1)
@@ -205,9 +205,9 @@ NEXT STEP (do this first, then re-run Preflight):
         # Versions pinned in your lab baseline
         # NOTE: PSDesiredStateConfiguration 2.0.7 requires PS 6.1+ and won't load in WinPS 5.1
         $script:Pinned = @{
-            ActiveDirectoryDsc          = [version]'6.6.0'
-            GroupPolicyDsc              = [version]'1.0.3'
-            Pester                      = [version]'5.7.1'
+            ActiveDirectoryDsc = [version]'6.7.1'
+            GroupPolicyDsc = [version]'1.0.3'
+            Pester = [version]'5.7.1'
         }
 
         # PS7-only modules (won't work in Windows PowerShell 5.1)

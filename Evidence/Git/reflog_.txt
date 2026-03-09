@@ -1,0 +1,24 @@
+508f348 HEAD@{0}: commit: Update repository evidence link
+0943b2e HEAD@{1}: commit: Update repository evidence link
+b5f41fa HEAD@{2}: commit: final submission -assessment day evidence included
+8c7f40b HEAD@{3}: commit: its not working there are some stuff appearing in my local server
+bfee938 HEAD@{4}: commit: Designed a tiered structure with specific Organizational Units for Bolton (HQ), Leeds, and Stoke to manage regional users and workstations.
+9c09bc9 HEAD@{5}: commit: Build Success: Resolved NetworkingDsc DnsClient issue and confirmed Pre-DC NIC settings
+a024cef HEAD@{6}: commit: at one point i saw 5 fails using powershell 5.1 but its not working anymore
+a0cbc2f HEAD@{7}: commit: i am trying to fix the dns error
+e70e94d HEAD@{8}: commit: still trying to fix fails shown by the pester tests and i have solved 1 problem so the fail count went from 33 to 32
+24dc3be HEAD@{9}: commit: fix: resolve ActiveDirectoryDsc version mismatch and install RSAT-ADDS
+e21cfea HEAD@{10}: commit: fixed the powershell error
+73a07cc HEAD@{11}: commit: Build 20260305_130216
+2355b4b HEAD@{12}: commit: FIX: Verified build with clean module environment
+38709e5 HEAD@{13}: commit: FIX: Resolved CIM class collisions and synchronized baseline
+72a9c82 HEAD@{14}: commit: Install the DNS Role and Management Tools required for the tests
+b328a14 HEAD@{15}: commit: FEAT: Full AD DS promotion DSC config + verified modules
+b4661ec HEAD@{16}: commit: FEAT:AllNodes.psd1:
+e68e935 HEAD@{17}: checkout: moving from Server-baseline-configured to Server-baseline-configured
+e68e935 HEAD@{18}: checkout: moving from Preflight-verified to Server-baseline-configured
+e68e935 HEAD@{19}: commit: Build 20260304_122946
+96b155b HEAD@{20}: commit: CHECKPOINT: preflight checks undertaken
+e1ebb01 HEAD@{21}: checkout: moving from main to Preflight-verified
+e1ebb01 HEAD@{22}: Branch: renamed refs/heads/main to refs/heads/main
+e1ebb01 HEAD@{24}: commit (initial): INITIAL: intial commit from mainstudent repo

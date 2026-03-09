@@ -234,8 +234,8 @@ Or set it to auto-start:
         }
     }
 
-    Context "Network Tests" {
-        
+     Context "Network Tests" {
+       
         It "Tests network adapter exists" {
             $adapter = Get-NetAdapter -Name 'Ethernet*' -ErrorAction SilentlyContinue
             $adapter | Should -Not -BeNullOrEmpty -Because @"

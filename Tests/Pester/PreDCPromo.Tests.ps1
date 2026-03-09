@@ -27,8 +27,8 @@ BeforeDiscovery {
 HINT: Missing network configuration properties in AllNodes.psd1!
 Add these properties to the localhost node:
 
-  InterfaceAlias_Internal = 'Ethernet'           # Internal network adapter name
-  InterfaceAlias_NAT = 'Ethernet 2'              # NAT/External adapter name
+  InterfaceAlias_Internal = 'Internal-Static'           # Internal network adapter name
+  InterfaceAlias_NAT = 'Internet-NAT'              # NAT/External adapter name
   IPv4Address_Internal = '192.168.99.10'         # Static IP for internal NIC
   PrefixLength_Internal = 24                     # Subnet mask (CIDR)
   DnsServers_Internal = @('127.0.0.1')          # DNS points to self (loopback)

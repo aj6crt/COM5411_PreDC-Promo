@@ -1,7 +1,19 @@
-# Design Notes (Student)
-
-Explain your decisions:
-- OU structure rationale
-- Group model rationale
-- GPO linking choices (later)
-- Any security controls you applied
+DC=barmbuzz,DC=corp
+└── OU=BarmBuzz                            ← Enterprise root
+    ├── OU=Tier0                           ← Domain control plane (restricted)
+    │   ├── OU=Admins
+    │   ├── OU=Servers
+    │   └── OU=ServiceAccounts
+    ├── OU=Sites
+    │   └── OU=Bolton                      ← HQ - Silicon Croal Valley
+    │       ├── OU=Users
+    │       └── OU=Computers
+    │           ├── OU=Workstations
+    │           ├── OU=POS
+    │           └── OU=Kiosks
+    ├── OU=Groups
+    │   ├── OU=Role                        ← Global groups (AGDLP: G layer)
+    │   └── OU=Resource                    ← Domain Local groups (AGDLP: DL layer)
+    └── OU=Clients                         ← Domain-joined endpoints
+        ├── OU=Windows
+        └── OU=Linux
